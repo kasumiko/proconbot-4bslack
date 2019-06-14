@@ -1,0 +1,53 @@
+AllCops:
+  TargetRubyVersion: 2.3
+
+FrozenStringLiteralComment:
+  Enabled: false
+
+Documentation:
+  Enabled: false
+
+RedundantReturn:
+  Enabled: false
+
+MutableConstant:
+  Enabled: false
+
+EmptyLineAfterGuardClause:
+  Enabled: false
+
+Style/BlockDelimiters:
+  Enabled: false
+
+Naming/UncommunicativeMethodParamName:
+  Enabled: false
+
+GlobalVars:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+AsciiComments:
+  Enabled: false
+
+LineLength:
+  Max: 100
+
+MethodLength:
+  Max: 30
+
+CyclomaticComplexity:
+  Max: 10
+
+RescueStandardError:
+  Enabled: false
+
+ClassVars:
+  Enabled: false
+
+Metrics/AbcSize:
+  Max: 20
+
+AccessorMethodName:
+  Enabled: false
