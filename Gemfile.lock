@@ -36,7 +36,16 @@ GEM
     json (2.2.0)
     minitest (5.11.3)
     multipart-post (2.1.1)
+    mustermann (1.0.3)
     public_suffix (3.1.0)
+    rack (2.0.7)
+    rack-protection (2.0.5)
+      rack
+    sinatra (2.0.5)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.5)
+      tilt (~> 2.0)
     slack-ruby-client (0.14.2)
       activesupport
       faraday (>= 0.9)
@@ -45,6 +54,7 @@ GEM
       hashie
       websocket-driver
     thread_safe (0.3.6)
+    tilt (2.0.9)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     unf (0.1.4)
@@ -63,6 +73,7 @@ DEPENDENCIES
   faye-websocket
   http
   json
+  sinatra
   slack-ruby-client
 
 BUNDLED WITH

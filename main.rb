@@ -1,40 +1,31 @@
-require 'json'
-require 'http'
 require 'dotenv'
-require 'eventmachine'
-require 'faye/websocket'
+require 'slack-ruby-client'
 
 Dotenv.load
-response = HTTP.post('https://slack.com/api/rtm.start', params: {
-                       token: ENV['SLACK_API_TOKEN']
-                     })
+Slack.configure do |config|
+  config.token = ENV['SLACK_API_TOKEN']
+end
 
-rc = JSON.parse(response.body)
-url = rc['url']
+Slack::RealTime::Client.config do |config|
+  config.websocket_ping = 30
+end
 
-EM.run do
-  ws = Faye::WebSocket::Client.new(url)
+@client = Slack::RealTime::Client.new
 
-  ws.on :open do
-    p [:open]
-  end
+@client.on :message do |data|
+  break if (data.user=='UKDFHP9A5') 
+  case data.text
+  when 'こん'
+    @client.message channel: data.channel, text: 'こん'
+  else
 
-  ws.on :message do |event|
-    data = JSON.parse(event.data)
-    p [:message, data]
-
-    if data['text'] == 'こん'
-      ws.send({
-        type: 'message',
-        text: "こんにちは <@#{data['user']}> さん",
-        channel: data['channel']
-      }.to_json)
-    end
-
-    ws.on :close do
-      p [:close, event.code]
-      ws = nil
-      EM.stop
-    end
   end
 end
+
+@client.on :closed do |data|
+  puts 'Connection has been disconnected.'
+  @client.start!
+end
+
+@client.start!
+
