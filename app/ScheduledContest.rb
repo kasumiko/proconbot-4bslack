@@ -3,13 +3,14 @@ require 'open-uri'
 require 'nokogiri'
 require 'rexml/document'
 require 'time'
+require_relative './OperateDB.rb'
 
-class PlannedContests
+class ScheduledContest
   BASE_URI = 'https://atcoder.jp'
 
 
   def update
-    topxpath = "//div[@class= 'table-responsive'][3]//@href"
+    topxpath = "//div[@class= 'table-responsive'][2]//@href"
     parsed_docs = parse_page(BASE_URI, [topxpath])
     # table number of contests
     # 1... Permanent
@@ -17,8 +18,17 @@ class PlannedContests
     # 3... Recent
     links = parsed_docs[0].map.with_index {|cont,i| cont.text if i%2==1}
     links.compact!
-    contest_data = links.map{|l| get_contest_data(BASE_URI+l)}
-    p contest_data
+    contest_data = links.map.with_index{|l| get_contest_data(BASE_URI+l)}
+    contest_data.map!.with_index{|d,i|d[:id]=i;d}
+    @db = ScheduledContestDB::OperateDB.new
+
+    unless contest_data.eql?(@db.all_data, 'scheduled_contests')
+      old = @db.all_data
+      @db.reflesh_data(ScheduledContestDB, contest_data)
+      puts('DB has been updated')
+      return @db.get_contest_data - old
+    end
+    return []
   end
 
   def get_page(url = BASE_URI)
@@ -38,10 +48,10 @@ class PlannedContests
     ret[:title] = data[0].text
     times = data[1].text.scan(/\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}\+\d{2}\:\d{2}/)
     times.map!{|t| t.gsub!('T',"\s").gsub!('+',"\s+")}
-    ret[:start_t] = Time.parse(times[0])
-    ret[:end_t] = Time.parse(times[1])
-    ret[:start_d] = ret[:start_t].to_date
-    ret[:end_d] = ret[:end_t].to_date
+    ret[:start_time] = Time.parse(times[0])
+    ret[:end_time] = Time.parse(times[1])
+    ret[:start_date] = ret[:start_time].to_date
+    ret[:end_date] = ret[:end_time].to_date
     return ret
   end
 
@@ -83,5 +93,5 @@ class PlannedContests
   end
 end
 
-obj = PlannedContests.new
-obj.update
+#obj = ScheduledContest.new
+#obj.update
