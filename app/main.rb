@@ -23,7 +23,7 @@ scheduler = Rufus::Scheduler.new
 
 #scheduler.cron '15 0 * * *' do
 scheduler.in '3m' do
-  dbatch = Batch::DailyBatch.new(client)
+  dbatch = Batch::DailyBatch.new(@client)
   dbatch.op_batch
 end
 
