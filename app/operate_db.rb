@@ -1,4 +1,3 @@
-
 class OperateDB
   attr_accessor :all_data
 

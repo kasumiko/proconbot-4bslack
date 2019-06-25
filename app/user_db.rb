@@ -1,6 +1,6 @@
 require 'active_record'
 require 'time'
-require_relative './OperateDB'
+require_relative './operate_db'
 
 module UserDB
   class Users < ActiveRecord::Base

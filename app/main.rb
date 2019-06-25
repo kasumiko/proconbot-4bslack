@@ -1,7 +1,8 @@
 require 'dotenv'
 require 'slack-ruby-client'
 require 'rufus-scheduler'
-require_relative './ContestSchedule.rb'
+require_relative './scheduled_contest/answer.rb'
+require_relative './batch/daily_batch.rb'
 
 Dotenv.load
 Slack.configure do |config|
@@ -19,13 +20,10 @@ end
 #------------------- Job Scheduler ------------------------
 scheduler = Rufus::Scheduler.new
 
-scheduler.every('1m') do
-  @client.message channel: ENV['CHANNEL'], text: Time.now
-end
 
-scheduler.cron '0 0 * * *' do
-  batch = DailyBatch.new(client)
-  batch.op_batch
+scheduler.cron '15 0 * * *' do
+  dbatch = Batch::DailyBatch.new(client)
+  dbatch.op_batch
 end
 
 # -------------- RTM Server -------------------------
@@ -36,7 +34,7 @@ end
 
 
 objs = [
-  ContestSchedule.new
+  ScheduledContest::Answerer.new
 ]
 
 @client.on :message do |data|

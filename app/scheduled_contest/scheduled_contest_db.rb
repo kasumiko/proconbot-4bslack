@@ -1,10 +1,10 @@
 require 'time'
 require 'active_record'
 require 'dotenv'
-require_relative './OperateDB.rb'
+require_relative '../operate_db.rb'
 
 Dotenv.load './config/.env'
-module ScheduledContestDB
+module ScheduledContest
   class ScheduledContests < ActiveRecord::Base #same as table name
   end
 

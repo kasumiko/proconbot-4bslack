@@ -2,7 +2,7 @@ require 'json'
 require 'open-uri'
 require 'dotenv'
 require 'rufus-scheduler'
-require_relative './UserDB.rb'
+require_relative '../user_db.rb'
 
 Dotenv.load './config/.env'
 class RateCheck
@@ -11,8 +11,7 @@ class RateCheck
     @users = ['kasu_miko','Kandam','nesouda']
   end
 
-  def update
-    rate = get_rate
+  def update(rates)
     UserDB::Users.establish_connection(ENV['DATABASE_URL'])
     @db = UserDB::Users
     @db.all.each_with_index{|user,i|
@@ -30,12 +29,14 @@ class RateCheck
     old_rate = @db.all_data.map{|d|
       d[:rate]
     }
-   # scheduler.every '1m' , :last_in => 3600*40 do
+    scheduler.every '1m' , :last_in => 3600*60 do
       new_rate = get_rate
       if comp_rate(old_rate,new_rate) 
         rate_report(old_rate,new_rate)
+        update(new_rate)
+        return
       end
-   # end
+    end
   end
 
   def comp_rate(old_rate,new_rate)
@@ -95,5 +96,5 @@ class RateCheck
 =end
 end
 
-rate = RateCheck.new
-rate.check_rate(0)
+#rate = RateCheck.new
+#rate.check_rate(0)
