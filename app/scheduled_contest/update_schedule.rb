@@ -11,16 +11,21 @@ module ScheduledContest
 
 
     def update
-      topxpath = "//div[@class= 'table-responsive'][2]//@href"
-      parsed_docs = parse_page(BASE_URI, [topxpath])
+      topxpath = ["//h4[2]","//div[@class= 'table-responsive'][2]//@href"]
+      parsed_docs = parse_page(BASE_URI, topxpath)
+      p parsed_docs[0].text
       # table number of contests
       # 1... Permanent
       # 2... Upcoming
       # 3... Recent
-      links = parsed_docs[0].map.with_index {|cont,i| cont.text if i%2==1}
-      links.compact!
-      contest_data = links.map.with_index{|l| get_contest_data(BASE_URI+l)}
-      contest_data.map!.with_index{|d,i|d[:id]=i;d}
+      if parsed_docs[0].text =~ /Recent/
+        contest_data = []
+      else
+        links = parsed_docs[1].map.with_index {|cont,i| cont.text if i%2==1}
+        links.compact!
+        contest_data = links.map.with_index{|l| get_contest_data(BASE_URI+l)}
+        contest_data.map!.with_index{|d,i|d[:id]=i;d}
+      end
       @db = OperateDB.new(ScheduledContests,'scheduled_contests')
 
       unless contest_data.eql?(@db.all_data)
@@ -94,5 +99,5 @@ module ScheduledContest
     end
   end
 end
-#obj = ScheduledContest.new
+#obj = ScheduledContest::ScheduledContest.new
 #obj.update

@@ -6,14 +6,14 @@ module ScheduledContest
       user = query[0]
       text = query[1]
       return unless text=~/今週のコンテスト/
-      type = "今週の"
+      type = "今週"
       return mk_reply(text,type)
     end
 
     def mk_reply(text,type)
       contests = get_contests_data
       return type + "予定されたコンテストはありません。" if contests == [] 
-      ret = type + "コンテストは\n"
+      ret = type + "予定されたコンテストは\n"
       contests = ContestInfo.new(contests)
       contests.info.each{|contest|ret += contest[:text]}
       ret += "です。"
