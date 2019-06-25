@@ -21,13 +21,13 @@ module ScheduledContest
       links.compact!
       contest_data = links.map.with_index{|l| get_contest_data(BASE_URI+l)}
       contest_data.map!.with_index{|d,i|d[:id]=i;d}
-      @db = ScheduledContestDB::OperateDB.new
+      @db = OperateDB.new(ScheduledContests,'scheduled_contests')
 
-      unless contest_data.eql?(@db.all_data, 'scheduled_contests')
+      unless contest_data.eql?(@db.all_data)
         old = @db.all_data
-        @db.reflesh_data(ScheduledContestDB, contest_data)
+        @db.reflesh_data(ScheduledContests, contest_data)
         puts('DB has been updated')
-        return @db.get_contest_data - old
+        return @db.get_all_data - old
       end
       return []
     end

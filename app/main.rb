@@ -22,7 +22,7 @@ scheduler = Rufus::Scheduler.new
 
 
 #scheduler.cron '15 0 * * *' do
-scheduler.in '3m' do
+scheduler.in '1m' do
   dbatch = Batch::DailyBatch.new(@client)
   dbatch.op_batch
 end
@@ -39,7 +39,8 @@ objs = [
 ]
 
 @client.on :message do |data|
-  break if (data.user=='UKDFHP9A5') 
+  next if (data.user=='UKDFHP9A5') 
+  p data.user
   case data.text
   when 'こん'
     @client.message channel: data.channel, text: 'こん'
