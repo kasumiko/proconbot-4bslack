@@ -9,17 +9,15 @@ Slack.configure do |config|
   config.token = ENV['SLACK_API_TOKEN']
 end
 
-http_proxy="0.0.0.0:"+ENV['PORT']
+http_proxy = '0.0.0.0:' + ENV['PORT']
 Slack::RealTime::Client.config do |config|
   config.websocket_ping = 15
   config.websocket_proxy = http_proxy
 end
-@client = Slack::RealTime::Client.new()
-
+@client = Slack::RealTime::Client.new
 
 #------------------- Job Scheduler ------------------------
 scheduler = Rufus::Scheduler.new
-
 
 scheduler.cron '0 0 * * *' do
   dbatch = Batch::DailyBatch.new(@client)
@@ -28,30 +26,31 @@ end
 
 # -------------- RTM Server -------------------------
 
-@client.on :open do |data|
+@client.on :open do
   p 'opened'
 end
-
 
 objs = [
   ScheduledContest::Answerer.new
 ]
 
 @client.on :message do |data|
-  next if (data.user=='UKDFHP9A5') 
+  next if data.user == 'UKDFHP9A5'
+
   case data.text
   when 'こん'
     @client.message channel: data.channel, text: 'こん'
-  else
   end
-  objs.each{|obj|
-    ans = obj.answer(data.user,data.text)
-    @client.message channel: data.channel, text: ans if ans != nil
+  objs.each do |obj|
+    ans = obj.answer(data.user, data.text)
+    @client.message channel: data.channel, text: ans unless ans.nil?
     p ans
-  }
+  end
 end
-@client.on :closed do |data|
+
+@client.on :closed do
   puts 'Connection has been disconnected.'
-  @client.start!
+  # @client.start!
 end
+
 @client.start!

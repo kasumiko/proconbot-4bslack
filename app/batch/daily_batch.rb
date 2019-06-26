@@ -13,6 +13,7 @@ module Batch
       @client = client
       @schedule = ScheduledContest::ScheduledContest.new
     end
+
     def op_batch
       update_db
       contest_today?
@@ -23,49 +24,51 @@ module Batch
     end
 
     def update_report(new_contests)
-      return if new_contests == [] 
+      return if new_contests == []
       text = "コンテスト予定が更新されました。\n"
       @conts = ContestInfo.new(new_contests)
-      @conts.info.each{|c|
+      @conts.info.each { |c|
         text += c[:text]
       }
-      @client.message channel: ENV['CHANNEL'], text: text
+      report(text)
       puts text
     end
 
-  # gabagaba
     def contest_today?
       today = Date.today
-      contests = ScheduledContest::OperateDB.new(ScheduledContest::ScheduledContests,'scheduled_contests')
+      dbclass = ScheduledContest::ScheduledContests
+      contests = ScheduledContest::OperateDB.new(dbclass, 'scheduled_contests')
       text = "今日は以下のコンテストが予定されています。\n"
       flag = false
       times = []
-      p contests.all_data
       conts = ContestInfo.new(contests.all_data)
-      conts.info.each{|c|
-        if c[:start_date] == today
-          text += c[:text]
-          times << c[:end_time]
-          flag = true
-        end
-      } 
-      return if flag == false
-      @client.message channel:ENV['CHANNEL'], text: text     
-      times.each{|t|
-        schedule = Rufus::Scheduler.new 
-        scheduler.at t.to_s do
-          r = RateCheck.new 
+      conts.info.each { |c|
+        next unless c[:start_date] == today
+        text += c[:text]
+        times << c[:end_time]
+        flag = true
+      }
+      return unless flag
+      report(text)
+      times.each { |t|
+        schedule = Rufus::Scheduler.new
+        schedule.at t.to_s do
+          r = RateCheck.new
           r.check_rate(@client)
         end
       }
     end
+
+    def report(text)
+      @client.message channel: ENV['CHANNEL'], text: text
+    end
   end
 end
 =begin
-time = Time.strptime("2019-06-25 16:38:15 +0900","%Y-%m-%d %H:%M:%S")
+time = Time.strptime('2019-06-26 16:38:15 +0900', '%Y-%m-%d %H:%M:%S')
 testdata = [
-  {:id=>1,:title=>"ABC130",:start_time=>time,:end_time=>time+120,:start_date=>Date.today,:end_date=>Date.today,:url=>"https://atcoder.jp"},
-  {:id=>2,:title=>"ABC131",:start_time=>time,:end_time=>time+60,:start_date=>Date.today,:end_date=>Date.today,:url=>"https://atcoder.jp"}
+  { id: 1, title: 'ABC130', start_time: time, end_time: time + 120, start_date: Date.today, end_date: Date.today, url: 'https://atcoder.jp' },
+  { id: 2, title: 'ABC131', start_time: time, end_time: time + 60, start_date: Date.today, end_date: Date.today, url: 'https://atcoder.jp' }
 ]
 
 Slack.configure do |config|
@@ -75,16 +78,16 @@ end
 Slack::RealTime::Client.config do |config|
   config.websocket_ping = 15
 end
-@client = Slack::RealTime::Client.new()
+@client = Slack::RealTime::Client.new
 
-@client.on :open do 
+@client.on :open do
   p 'open'
 end
 
-@client.on :message do |data|
+@client.on :message do |_data|
   batch = Batch::DailyBatch.new(@client)
-  #batch.update_report(testdata)
-  batch.contest_today?
+  #   batch.update_report(testdata)
+  batch.contest_today?(testdata)
 end
 @client.start!
 =end

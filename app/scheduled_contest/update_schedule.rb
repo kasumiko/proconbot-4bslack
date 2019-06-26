@@ -9,9 +9,8 @@ module ScheduledContest
   class ScheduledContest
     BASE_URI = 'https://atcoder.jp'
 
-
     def update
-      topxpath = ["//h4[2]","//div[@class= 'table-responsive'][2]//@href"]
+      topxpath = ['//h4[2]', "//div[@class= 'table-responsive'][2]//@href"]
       parsed_docs = parse_page(BASE_URI, topxpath)
       p parsed_docs[0].text
       # table number of contests
@@ -21,12 +20,15 @@ module ScheduledContest
       if parsed_docs[0].text =~ /Recent/
         contest_data = []
       else
-        links = parsed_docs[1].map.with_index {|cont,i| cont.text if i%2==1}
+        links = parsed_docs[1].map.with_index { |cont, i| cont.text if i.odd? }
         links.compact!
-        contest_data = links.map.with_index{|l| get_contest_data(BASE_URI+l)}
-        contest_data.map!.with_index{|d,i|d[:id]=i;d}
+        contest_data = links.map { |l| get_contest_data(BASE_URI + l) }
+        contest_data.map!.with_index do |d, i| 
+          d[:id] = i
+          d
+        end
       end
-      @db = OperateDB.new(ScheduledContests,'scheduled_contests')
+      @db = OperateDB.new(ScheduledContests, 'scheduled_contests')
 
       unless contest_data.eql?(@db.all_data)
         old = @db.all_data
@@ -41,19 +43,20 @@ module ScheduledContest
       return Nokogiri::HTML.parse(URI.parse(url).open, nil, 'utf-8')
     end
 
-    def parse_page(url, xpaths) # xpaths must be array
+    # xpaths must be array
+    def parse_page(url, xpaths) 
       doc = get_page(url)
-      ret = xpaths.map{|xp|
-        doc.xpath(xp) 
+      ret = xpaths.map { |xp|
+        doc.xpath(xp)
       }
       return ret
     end
 
     def format_contest_data(data)
-      ret = Hash.new
+      ret = {}
       ret[:title] = data[0].text
       times = data[1].text.scan(/\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}\+\d{2}\:\d{2}/)
-      times.map!{|t| t.gsub!('T',"\s").gsub!('+',"\s+")}
+      times.map! { |t| t.gsub!('T', "\s").gsub!('+', "\s+") }
       ret[:start_time] = Time.parse(times[0])
       ret[:end_time] = Time.parse(times[1])
       ret[:start_date] = ret[:start_time].to_date
@@ -62,28 +65,28 @@ module ScheduledContest
     end
 
     def get_contest_data(url)
-      xpaths=[
-        "//title",
-        "//script[9]"
+      xpaths = [
+        '//title',
+        '//script[9]'
       ]
-      raw_data = parse_page(url,xpaths)
+      raw_data = parse_page(url, xpaths)
       data = format_contest_data(raw_data)
       data[:url] = url
       return data
     end
 
-  #-------------------test funcs--------------------
+    #-------------------test funcs--------------------
     def get_page_test(file)
-      return  Nokogiri::HTML.parse(File.open(file), nil, 'utf-8')
+      return Nokogiri::HTML.parse(File.open(file), nil, 'utf-8')
     end
 
     def parse_page_test(file, xpaths) # xpaths must be array
       doc = get_page_test(file)
-      xpaths=[
-        "//title",
-        "//script[9]"
+      xpaths = [
+        '//title',
+        '//script[9]'
       ]
-      ret = xpaths.map{|xp|
+      ret = xpaths.map { |xp|
         doc.xpath(xp).text
       }
       return ret
@@ -91,13 +94,13 @@ module ScheduledContest
 
     def main_page_test
       parsed_docs = parse_page_test('test.html', ["//div[@class= 'table-responsive'][3]//@href"])
-      @links = parsed_docs[0].map.with_index {|cont,i| cont.text if i%2==1}
+      @links = parsed_docs[0].map.with_index { |cont, i| cont.text if i.odd? }
       @links.compact!
-      contest_data = @links.map{|l|
-        parse_page(l,xpaths) 
+      contest_data = @links.map { |l|
+        parse_page(l, xpaths)
       }
     end
   end
 end
-#obj = ScheduledContest::ScheduledContest.new
-#obj.update
+# obj = ScheduledContest::ScheduledContest.new
+# obj.update
