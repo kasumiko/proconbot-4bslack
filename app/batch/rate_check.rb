@@ -11,7 +11,7 @@ class RateCheck
     @users = %w[kasu_miko Kandam nesouda]
   end
 
-  def update(_rates)
+  def update(rate)
     UserDB::Users.establish_connection(ENV['DATABASE_URL'])
     @db = UserDB::Users
     @db.all.each_with_index { |user, i|
@@ -81,7 +81,7 @@ class RateCheck
       text += diff.positive? ? '+' : ''
       text += "#{diff})\n"
     end
-    #    @client.message channel: ENV['CHANNEL'], text: text
+    @client.message channel: ENV['CHANNEL'], text: text
     puts text
   end
   #   def create
