@@ -4,6 +4,7 @@ require 'nokogiri'
 require 'rexml/document'
 require 'time'
 require_relative '../operate_db.rb'
+require_relative './scheduled_contest_db.rb'
 
 module ScheduledContest
   class ScheduledContest
@@ -29,7 +30,6 @@ module ScheduledContest
         end
       end
       @db = OperateDB.new(ScheduledContests, 'scheduled_contests')
-
       unless contest_data.eql?(@db.all_data)
         old = @db.all_data
         @db.reflesh_data(ScheduledContests, contest_data)
@@ -102,5 +102,5 @@ module ScheduledContest
     end
   end
 end
-# obj = ScheduledContest::ScheduledContest.new
-# obj.update
+ obj = ScheduledContest::ScheduledContest.new
+ obj.update

@@ -7,6 +7,7 @@ Dotenv.load './config/.env'
 module ScheduledContest
   class ScheduledContests < ActiveRecord::Base
     # same as table name
+    self.default_timezone = :local
   end
 
   class OperateDB < OperateDB

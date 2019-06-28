@@ -57,7 +57,6 @@ class RateCheck
         :name, @users[i],
         :rate, d[:newrating].to_i,
         :updated_at, Date.today,
-        :max_score, 0
       ]
     }
   end

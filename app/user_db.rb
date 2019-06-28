@@ -4,6 +4,7 @@ require_relative './operate_db'
 
 module UserDB
   class Users < ActiveRecord::Base
+    self.default_timezone = :local
   end
 
   class OperateDB < OperateDB

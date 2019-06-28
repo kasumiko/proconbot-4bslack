@@ -23,6 +23,7 @@ module RandomProblem
       @db = UserDB::Users
       @users = @db.find_by(slack_name: user)
       @max_score = @users[:max_score].to_i
+      @max_score = 100 if @max_score == 0
       user = @users[:atcoder_name]
       return unless text =~ /問題くれ/
       @solved_problem = get_json(@submission+user)
