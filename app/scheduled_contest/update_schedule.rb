@@ -102,5 +102,5 @@ module ScheduledContest
     end
   end
 end
- obj = ScheduledContest::ScheduledContest.new
- obj.update
+# obj = ScheduledContest::ScheduledContest.new
+# obj.update

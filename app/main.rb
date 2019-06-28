@@ -11,7 +11,7 @@ Slack.configure do |config|
 end
 
 Slack::RealTime::Client.config do |config|
-  config.websocket_ping = 10
+  config.websocket_ping = 15 
   config.websocket_proxy = '0.0.0.0:' + ENV['PORT']
 end
 client = Slack::RealTime::Client.new
@@ -25,8 +25,9 @@ p $members
 #------------------- Job Scheduler ------------------------
 scheduler = Rufus::Scheduler.new
 
-scheduler.cron '0 0 * * *' do
-  dbatch = Batch::DailyBatch.new(client)
+scheduler.in '10s' do
+#scheduler.cron '0 0 * * *' do
+  dbatch = Batch::DailyBatch.new(client.web_client)
   dbatch.op_batch
 end
 
@@ -42,7 +43,8 @@ objs = [
 ]
 
 client.on :message do |data|
-  next if data.user == ENV['BOT_SLACK_ID'] || data.user.nil?
+  next if data.user == ENV['BOT_SLACK_ID'] || data.user.nil? || data.text.nil?
+  p data
   ans = nil
   objs.each do |obj|
     ans = obj.answer(data.user, data.text)

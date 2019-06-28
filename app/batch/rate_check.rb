@@ -30,10 +30,12 @@ class RateCheck
       d[:rate]
     }
     scheduler.every '1m', last_in: 3600 * 60 do
+      puts 'rate check start!'
       new_rate = get_rate
       if comp_rate(old_rate, new_rate)
         rate_report(old_rate, new_rate)
         update(new_rate)
+        puts 'rate check finish'
         return
       end
     end
@@ -77,10 +79,10 @@ class RateCheck
       diff = n[:rate] - old_rate[i]
       text += n[:name]
       text += "  #{old_rate[i]} => #{n[:rate]} ("
-      text += diff.positive? ? '+' : ''
+      text += diff.negative? ? '-' : '+'
       text += "#{diff})\n"
     end
-    @client.message channel: ENV['CHANNEL'], text: text
+    @client.chat_postMessage channel: ENV['CHANNEL'], text: text, as_user: true
     puts text
   end
   #   def create

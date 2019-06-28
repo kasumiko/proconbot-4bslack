@@ -53,6 +53,7 @@ module Batch
       times.each { |t|
         schedule = Rufus::Scheduler.new
         schedule.at t.to_s do
+          puts 'rate check set'
           r = RateCheck.new
           r.check_rate(@client)
         end
@@ -60,7 +61,9 @@ module Batch
     end
 
     def report(text)
-      @client.message channel: ENV['CHANNEL'], text: text
+      return if text.nil?
+      @client.chat_postMessage channel: ENV['CHANNEL'], text: text, as_user: true
+      puts text
     end
   end
 end

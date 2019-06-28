@@ -18,6 +18,7 @@ module RandomProblem
     def answer(*arg)
       user = arg[0]
       text = arg[1]
+      return unless text =~ /問題くれ/
       user = $members[user]
       UserDB::Users.establish_connection(ENV['DATABASE_URL'])
       @db = UserDB::Users
@@ -25,7 +26,6 @@ module RandomProblem
       @max_score = @users[:max_score].to_i
       @max_score = 100 if @max_score == 0
       user = @users[:atcoder_name]
-      return unless text =~ /問題くれ/
       @solved_problem = get_json(@submission+user)
       update_max_score
       return mk_reply(choose_problem,user)
