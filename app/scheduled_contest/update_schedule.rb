@@ -18,7 +18,7 @@ module ScheduledContest
       # 1... Permanent
       # 2... Upcoming
       # 3... Recent
-      if parsed_docs[0].text =~ /Recent||Constant/
+      if parsed_docs[0].text =~ /Recent|Constant/
         contest_data = []
       else
         links = parsed_docs[1].map.with_index { |cont, i| cont.text if i.odd? }

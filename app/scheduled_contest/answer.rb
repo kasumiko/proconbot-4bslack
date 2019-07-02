@@ -5,8 +5,8 @@ module ScheduledContest
     def answer(*query)
       user = query[0]
       text = query[1]
-      return unless text =~ /今週のコンテスト/
-      type = '今週'
+      return unless text =~ /コンテスト予定/
+      type = ''
       return mk_reply(text, type)
     end
 

@@ -10,7 +10,7 @@ Dotenv.load './config/.env'
 module Batch
   class DailyBatch
     def initialize
-      @schedule = ScheduledContest::ScheduledContest.new
+      @contests = ScheduledContest::ScheduledContest.new
     end
 
     def op_batch
@@ -19,7 +19,7 @@ module Batch
     end
 
     def update_db
-      update_report(@schedule.update)
+      update_report(@contests.update)
     end
 
     def update_report(new_contests)
