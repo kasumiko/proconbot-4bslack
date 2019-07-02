@@ -8,6 +8,8 @@ module UserDB
   end
 
   class OperateDB < OperateDB
+    @dbclass = Users
+    @table_name = 'users'
     def format_results(hash_a)
       return hash_a.map { |hash|
         hash[:id] = hash[:id].to_i

@@ -1,10 +1,11 @@
 class OperateDB
   attr_accessor :all_data
-
-  def initialize(dbclass, table_name)
-    dbclass.establish_connection(ENV['DATABASE_URL'])
-    @con = dbclass.connection
-    @query_a = 'select * from ' + table_name
+  @dbclass=Class.new
+  @table_name=''
+  def initialize
+    @dbclass.establish_connection(ENV['DATABASE_URL'])
+    @con = @dbclass.connection
+    @query_a = 'select * from ' + @table_name
     @all_data = @con.select_all(@query_a).to_hash
     @all_data = format_results(symbolize_keys(@all_data))
   end

@@ -29,7 +29,7 @@ module ScheduledContest
           d
         end
       end
-      @db = OperateDB.new(ScheduledContests, 'scheduled_contests')
+      @db = OperateDB.new
       unless contest_data.eql?(@db.all_data)
         old = @db.all_data
         @db.reflesh_data(ScheduledContests, contest_data)

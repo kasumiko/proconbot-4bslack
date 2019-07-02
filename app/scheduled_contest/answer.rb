@@ -21,11 +21,9 @@ module ScheduledContest
     end
 
     def get_contests_data
-      db = OperateDB.new(ScheduledContests, 'scheduled_contests')
+      db = OperateDB.new
       return db.all_data
     end
   end
 end
 
-# obj = ScheduledContest::Answerer.new()
-# puts obj.answer('kasu_miko','今週のコンテスト')

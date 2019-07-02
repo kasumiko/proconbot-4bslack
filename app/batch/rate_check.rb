@@ -24,12 +24,12 @@ class RateCheck
 
   def check_rate
     scheduler = Rufus::Scheduler.new
-    @db = UserDB::OperateDB.new(UserDB::Users, 'users')
+    @db = UserDB::OperateDB.new
     old_rate = @db.all_data.map { |d|
       d[:rate]
     }
+    puts 'rate check start!'
     scheduler.every '1m', last_in: 3600 * 60 do
-      puts 'rate check start!'
       new_rate = get_rate
       if comp_rate(old_rate, new_rate)
         rate_report(old_rate, new_rate)
@@ -37,6 +37,7 @@ class RateCheck
         puts 'rate check finish'
         return
       end
+      puts 'not updated yet'
     end
   end
 
@@ -92,6 +93,3 @@ class RateCheck
   #     p @db.get_all_data.to_hash
   #   end
 end
-
-# rate = RateCheck.new
-# rate.check_rate(0)

@@ -7,6 +7,7 @@ require_relative './hello.rb'
 require_relative './scheduled_contest/answer.rb'
 require_relative './random_problem/answer.rb'
 require_relative './batch/daily_batch.rb'
+require_relative './batch/force_batch.rb'
 
 Dotenv.load
 
@@ -112,8 +113,13 @@ post '/callback' do
   end
 end
 
-get '/force_batch' do
-  dbatch = Batch::DailyBatch.new 
-  dbatch.op_batch
-  "ok"
+post '/force' do
+  body = JSON.parse(request.body.read)
+  if body['pass'] != ENV['FORCE_PASS'] 
+    'pass is wrong'
+  elsif body['type'].nil?
+      'type is empty'
+  else
+      Batch::ForceBatch.op_batch(body['type'])
+  end
 end

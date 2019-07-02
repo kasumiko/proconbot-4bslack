@@ -33,23 +33,30 @@ module Batch
       puts text
     end
 
-    def contest_today?
+    def check_schedule
+      text = ''
       today = Date.today
-      dbclass = ScheduledContest::ScheduledContests
-      contests = ScheduledContest::OperateDB.new(dbclass, 'scheduled_contests')
-      text = "今日は以下のコンテストが予定されています。\n"
-      flag = false
-      times = []
+      contests = ScheduledContest::OperateDB.new
+      @endtimes = []
       conts = ContestInfo.new(contests.all_data)
       conts.info.each { |c|
         next unless c[:start_date] == today
         text += c[:text]
-        times << c[:end_time]
-        flag = true
+        @endtimes << c[:end_time]
       }
-      return unless flag
-      report(text)
-      times.each { |t|
+      return text
+    end
+
+    def contest_today?
+      text = "今日は以下のコンテストが予定されています。\n"
+      schetext = check_schedule
+      return if schetext == ''
+      report(text+schetext)
+      rate_check_start
+    end
+
+    def rate_check_start
+      @endtimes.each { |t|
         schedule = Rufus::Scheduler.new
         schedule.at t.to_s do
           puts 'rate check set'
@@ -66,30 +73,3 @@ module Batch
     end
   end
 end
-=begin
-time = Time.strptime('2019-06-26 16:38:15 +0900', '%Y-%m-%d %H:%M:%S')
-testdata = [
-  { id: 1, title: 'ABC130', start_time: time, end_time: time + 120, start_date: Date.today, end_date: Date.today, url: 'https://atcoder.jp' },
-  { id: 2, title: 'ABC131', start_time: time, end_time: time + 60, start_date: Date.today, end_date: Date.today, url: 'https://atcoder.jp' }
-]
-
-Slack.configure do |config|
-  config.token = ENV['SLACK_API_TOKEN']
-end
-
-Slack::RealTime::Client.config do |config|
-  config.websocket_ping = 15
-end
-@client = Slack::RealTime::Client.new
-
-@client.on :open do
-  p 'open'
-end
-
-@client.on :message do |_data|
-  batch = Batch::DailyBatch.new(@client)
-  #   batch.update_report(testdata)
-  batch.contest_today?(testdata)
-end
-@client.start!
-=end
