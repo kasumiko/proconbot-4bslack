@@ -90,8 +90,8 @@ get '/' do
   redirect 'https://github.com/kasumiko/proconbot-4bslack'
 end
 
-get 'alive' do
-  'alive'
+get '/alive' do
+  "alive"
 end
 
 post '/callback' do
@@ -103,11 +103,17 @@ post '/callback' do
     content_type :json
     body.to_json
   when 'event_callback'
-    next if event_id == last_event_id || Time.now.to_f - event['ts'].to_f > 10.0
+    next if event_id == last_event_id || Time.now.to_f - event['ts'].to_f > 10.0 || event['channel']!=ENV['CHANNEL']
     p body
     last_event_id = event_id
     main = Main::Main.new
     main.reply(event) 
   'ok'
   end
+end
+
+get '/force_batch' do
+  dbatch = Batch::DailyBatch.new 
+  dbatch.op_batch
+  "ok"
 end
