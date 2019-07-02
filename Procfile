@@ -1,1 +1,1 @@
-bot: bundle exec ruby app/main.rb 
+web: bundle exec rackup app/config.ru -p $PORT

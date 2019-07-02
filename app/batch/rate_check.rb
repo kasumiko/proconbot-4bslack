@@ -22,8 +22,7 @@ class RateCheck
     }
   end
 
-  def check_rate(client)
-    @client = client
+  def check_rate
     scheduler = Rufus::Scheduler.new
     @db = UserDB::OperateDB.new(UserDB::Users, 'users')
     old_rate = @db.all_data.map { |d|
@@ -82,8 +81,8 @@ class RateCheck
       text += diff.negative? ? '-' : '+'
       text += "#{diff})\n"
     end
-    @client.chat_postMessage channel: ENV['CHANNEL'], text: text, as_user: true
-    puts text
+    messenger = Main::Main.new
+    messenger.message(text)
   end
   #   def create
   #     rate_data = get_rate_data

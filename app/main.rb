@@ -1,70 +1,113 @@
 require 'dotenv'
+require 'sinatra'
+require 'json'
 require 'slack-ruby-client'
 require 'rufus-scheduler'
+require_relative './hello.rb'
 require_relative './scheduled_contest/answer.rb'
 require_relative './random_problem/answer.rb'
 require_relative './batch/daily_batch.rb'
 
 Dotenv.load
-Slack.configure do |config|
-  config.token = ENV['SLACK_API_TOKEN']
-end
 
-Slack::RealTime::Client.config do |config|
-  config.websocket_ping = 15 
-  config.websocket_proxy = '0.0.0.0:' + ENV['PORT']
-end
-client = Slack::RealTime::Client.new
+module Main 
+  class Main
+    attr_accessor :client
+    def initialize
+      Slack.configure do |config|
+        config.token = ENV['SLACK_API_TOKEN']
+      end
+      @client ||= Slack::Web::Client.new
+    end
 
-$members = Hash.new
-client.web_client.users_list.members.each do |user|
-    $members[user.id] = user.name
+    def get_members
+      members = Hash.new
+      @client.users_list.members.each do |user|
+          members[user.id] = user.name
+      end
+      return members
+    end
+
+    def mk_reply(event)
+      user = event['user']
+      text = event['text']
+      ret = nil
+      return if user==ENV['BOT_SLACK_ID'] || user.nil? || text.nil?
+      puts user + ' ' + text
+      objs = [
+        ScheduledContest::Answerer.new,
+        RandomProblem::Answerer.new,
+        Hello.new
+      ]
+      objs.each do |obj|
+        ans = obj.answer user,text
+        begin
+          unless ans.nil?
+            ret = ans
+            break
+          end
+        rescue => exception
+          p exception.message
+          ret = "#{exception.message}"
+        end
+      end
+      return ret
+    end
+
+    def reply(event)
+      text = mk_reply(event)
+      return if text == '' || text.nil?
+      puts text
+      message(text)
+    end
+
+    def message(text)
+      puts text
+      @client.chat_postMessage(
+        as_user: 'true',
+        channel: ENV['CHANNEL'],
+        text: text
+      ) 
+    end
+  end
 end
-p $members
 
 #------------------- Job Scheduler ------------------------
 scheduler = Rufus::Scheduler.new
+main = Main::Main.new
+$members = main.get_members
 
-scheduler.in '10s' do
-#scheduler.cron '0 0 * * *' do
-  dbatch = Batch::DailyBatch.new(client.web_client)
+#scheduler.in '10s' do
+scheduler.cron '0 0 * * *' do
+  dbatch = Batch::DailyBatch.new 
   dbatch.op_batch
 end
 
-# -------------- RTM Server -------------------------
+# -------------- Server ----------------
+last_event_id = ''
 
-client.on :open do
-  p 'opened'
+get '/' do
+  redirect 'https://github.com/kasumiko/proconbot-4bslack'
 end
 
-objs = [
-  ScheduledContest::Answerer.new,
-  RandomProblem::Answerer.new
-]
+get 'alive' do
+  'alive'
+end
 
-client.on :message do |data|
-  next if data.user == ENV['BOT_SLACK_ID'] || data.user.nil? || data.text.nil?
-  p data
-  ans = nil
-  objs.each do |obj|
-    ans = obj.answer(data.user, data.text)
-    unless ans.nil? 
-      client.message channel: data.channel, text: ans 
-      p data.channel
-      break
-    end
+post '/callback' do
+  body = JSON.parse(request.body.read)
+  event = body['event']
+  event_id = body['event_id']
+  case body['type']
+  when 'url_verification'
+    content_type :json
+    body.to_json
+  when 'event_callback'
+    next if event_id == last_event_id || Time.now.to_f - event['ts'].to_f > 10.0
+    p body
+    last_event_id = event_id
+    main = Main::Main.new
+    main.reply(event) 
+  'ok'
   end
-  case data.text
-  when 'こん'
-    client.message channel: data.channel, text: 'こん'
-    ans = 'こん'
-  end
-  p ans
 end
-
-client.on :closed do
-  puts 'Connection has been disconnected.'
-  # @client.start!
-end
-
-client.start!

@@ -9,8 +9,7 @@ Dotenv.load './config/.env'
 
 module Batch
   class DailyBatch
-    def initialize(client)
-      @client = client
+    def initialize
       @schedule = ScheduledContest::ScheduledContest.new
     end
 
@@ -55,15 +54,15 @@ module Batch
         schedule.at t.to_s do
           puts 'rate check set'
           r = RateCheck.new
-          r.check_rate(@client)
+          r.check_rate
         end
       }
     end
 
     def report(text)
       return if text.nil?
-      @client.chat_postMessage channel: ENV['CHANNEL'], text: text, as_user: true
-      puts text
+      messenger = Main::Main.new
+      messenger.message(text)
     end
   end
 end
