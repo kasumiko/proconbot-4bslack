@@ -12,8 +12,11 @@ module ScheduledContest
 
   class OperateDB < OperateDB
     attr_accessor :all_data
-    @dbclass = ScheduledContests
-    @table_name = 'scheduled_contests'
+    def make_table_vars
+      @dbclass = ScheduledContests
+      @table_name = 'scheduled_contests'
+    end
+
     def format_results(hash_a)
       return hash_a.map { |hash|
         hash[:id] = hash[:id].to_i

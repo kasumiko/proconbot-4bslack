@@ -1,13 +1,17 @@
 class OperateDB
   attr_accessor :all_data
-  @dbclass=Class.new
-  @table_name=''
   def initialize
+    make_table_vars
     @dbclass.establish_connection(ENV['DATABASE_URL'])
     @con = @dbclass.connection
     @query_a = 'select * from ' + @table_name
     @all_data = @con.select_all(@query_a).to_hash
     @all_data = format_results(symbolize_keys(@all_data))
+  end
+
+  def make_table_vars
+    @dbclass=Class.new
+    @table_name=''
   end
 
   def symbolize_keys(hash_a)
