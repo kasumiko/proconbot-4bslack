@@ -10,8 +10,8 @@ class OperateDB
   end
 
   def make_table_vars
-    @dbclass=Class.new
-    @table_name=''
+    @dbclass = Class.new
+    @table_name = ''
   end
 
   def symbolize_keys(hash_a)

@@ -51,7 +51,7 @@ module Batch
       text = "今日は以下のコンテストが予定されています。\n"
       schetext = check_schedule
       return if schetext == ''
-      report(text+schetext)
+      report(text + schetext)
       rate_check_start
     end
 

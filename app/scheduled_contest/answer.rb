@@ -26,4 +26,3 @@ module ScheduledContest
     end
   end
 end
-

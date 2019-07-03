@@ -15,7 +15,7 @@ module Batch
       when 'rate_check'
         obj = Batch::DailyBatch.new
         obj.check_schedule
-        obj.rate_check_start 
+        obj.rate_check_start
         'rate_check'
       when 'force_rate_check'
         obj = RateCheck.new

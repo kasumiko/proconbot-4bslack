@@ -11,7 +11,7 @@ require_relative './batch/force_batch.rb'
 
 Dotenv.load
 
-module Main 
+module Main
   class Main
     attr_accessor :client
     def initialize
@@ -22,9 +22,9 @@ module Main
     end
 
     def get_members
-      members = Hash.new
+      members = {}
       @client.users_list.members.each do |user|
-          members[user.id] = user.name
+        members[user.id] = user.name
       end
       return members
     end
@@ -33,7 +33,7 @@ module Main
       user = event['user']
       text = event['text']
       ret = nil
-      return if user==ENV['BOT_SLACK_ID'] || user.nil? || text.nil?
+      return if user == ENV['BOT_SLACK_ID'] || user.nil? || text.nil?
       puts user + ' ' + text
       objs = [
         ScheduledContest::Answerer.new,
@@ -41,15 +41,15 @@ module Main
         Hello.new
       ]
       objs.each do |obj|
-        ans = obj.answer user,text
+        ans = obj.answer user, text
         begin
           unless ans.nil?
             ret = ans
             break
           end
-        rescue => exception
-          p exception.message
-          ret = "#{exception.message}"
+        rescue => e
+          p e.message
+          ret = e.message.to_s
         end
       end
       return ret
@@ -68,7 +68,7 @@ module Main
         as_user: 'true',
         channel: ENV['CHANNEL'],
         text: text
-      ) 
+      )
     end
   end
 end
@@ -78,9 +78,9 @@ scheduler = Rufus::Scheduler.new
 main = Main::Main.new
 $members = main.get_members
 
-#scheduler.in '10s' do
+# scheduler.in '10s' do
 scheduler.cron '0 0 * * *' do
-  dbatch = Batch::DailyBatch.new 
+  dbatch = Batch::DailyBatch.new
   dbatch.op_batch
 end
 
@@ -92,7 +92,7 @@ get '/' do
 end
 
 get '/alive' do
-  "alive"
+  'alive'
 end
 
 post '/callback' do
@@ -104,22 +104,22 @@ post '/callback' do
     content_type :json
     body.to_json
   when 'event_callback'
-    next if event_id == last_event_id || Time.now.to_f - event['ts'].to_f > 10.0 || event['channel']!=ENV['CHANNEL']
+    next if event_id == last_event_id || Time.now.to_f - event['ts'].to_f > 10.0 || event['channel'] != ENV['CHANNEL']
     p body
     last_event_id = event_id
     main = Main::Main.new
-    main.reply(event) 
-  'ok'
+    main.reply(event)
+    'ok'
   end
 end
 
 post '/force' do
   body = JSON.parse(request.body.read)
-  if body['pass'] != ENV['FORCE_PASS'] 
+  if body['pass'] != ENV['FORCE_PASS']
     'pass is wrong'
   elsif body['type'].nil?
-      'type is empty'
+    'type is empty'
   else
-      Batch::ForceBatch.op_batch(body['type'])
+    Batch::ForceBatch.op_batch(body['type'])
   end
 end
