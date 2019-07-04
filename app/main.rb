@@ -6,6 +6,7 @@ require 'rufus-scheduler'
 require_relative './hello.rb'
 require_relative './scheduled_contest/answer.rb'
 require_relative './random_problem/answer.rb'
+require_relative './random_problem/duel.rb'
 require_relative './batch/daily_batch.rb'
 require_relative './batch/force_batch.rb'
 
@@ -38,7 +39,8 @@ module Main
       objs = [
         ScheduledContest::Answerer.new,
         RandomProblem::Answerer.new,
-        Hello.new
+        Hello.new,
+        RandomProblem::Duel.new
       ]
       objs.each do |obj|
         ans = obj.answer user, text
@@ -49,26 +51,22 @@ module Main
           end
         rescue => e
           p e.message
-          ret = e.message.to_s
+          ret = {as_user: true, channel: ENV['CHANNEL'], text: e.message.to_s}
         end
       end
       return ret
     end
 
     def reply(event)
-      text = mk_reply(event)
-      return if text == '' || text.nil?
-      puts text
-      message(text)
+      ret = mk_reply(event)
+      return if ret == '' || ret.nil?
+      p ret
+      message(ret)
     end
 
-    def message(text)
-      puts text
-      @client.chat_postMessage(
-        as_user: 'true',
-        channel: ENV['CHANNEL'],
-        text: text
-      )
+    def message(hash)
+      puts hash[:text]
+      @client.chat_postMessage(hash)
     end
   end
 end
@@ -113,6 +111,10 @@ post '/callback' do
   end
 end
 
+post '/button' do
+  RandomProblem::Duel.start
+end
+
 post '/force' do
   body = JSON.parse(request.body.read)
   if body['pass'] != ENV['FORCE_PASS']
@@ -123,3 +125,4 @@ post '/force' do
     Batch::ForceBatch.op_batch(body['type'])
   end
 end
+

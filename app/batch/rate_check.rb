@@ -83,7 +83,7 @@ class RateCheck
       text += "#{diff})\n"
     end
     messenger = Main::Main.new
-    messenger.message(text)
+    messenger.message(as_user:true, channel: ENV['CHANNEL'], text: text)
   end
   #   def create
   #     rate_data = get_rate_data

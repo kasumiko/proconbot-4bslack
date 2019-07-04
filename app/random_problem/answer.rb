@@ -9,6 +9,7 @@ require 'slack-ruby-client'
 Dotenv.load './config/.env'
 module RandomProblem
   class Answerer
+    attr_accessor :max_score, :submission, :solved_problem
     def initialize
       @contest_info = 'resources/contests.json'
       @problem_info = 'resources/merged-problems.json'
@@ -36,7 +37,7 @@ module RandomProblem
       text += prob['contest_id'].upcase + ' ' + prob['title'] + "\n"
       text += mk_url(prob)
       text += "\nを解いてください。"
-      return text
+      return {as_user: true, channel: ENV['CHANNEL'], text: text}
     end
 
     def update_max_score

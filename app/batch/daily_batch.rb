@@ -69,7 +69,7 @@ module Batch
     def report(text)
       return if text.nil?
       messenger = Main::Main.new
-      messenger.message(text)
+      messenger.message(as_user: true, chennel: ENV['CHANNEL'], text: text)
     end
   end
 end
