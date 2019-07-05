@@ -37,7 +37,7 @@ module RandomProblem
       text += prob['contest_id'].upcase + ' ' + prob['title'] + "\n"
       text += mk_url(prob)
       text += "\nを解いてください。"
-      return {as_user: true, channel: ENV['CHANNEL'], text: text}
+      return text
     end
 
     def update_max_score

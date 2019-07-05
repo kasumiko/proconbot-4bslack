@@ -30,7 +30,7 @@ module Batch
         obj.update
         'update_db'
       else
-        'invalid type was thrown!'
+        'invalid type was passed!'
       end
     end
   end

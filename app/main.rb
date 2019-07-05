@@ -3,17 +3,16 @@ require 'sinatra'
 require 'json'
 require 'slack-ruby-client'
 require 'rufus-scheduler'
-require_relative './hello.rb'
-require_relative './scheduled_contest/answer.rb'
-require_relative './random_problem/answer.rb'
-require_relative './random_problem/duel.rb'
-require_relative './batch/daily_batch.rb'
-require_relative './batch/force_batch.rb'
+require_relative './src/request_condition.rb'
+require_relative './src/random_problem/duel.rb'
+require_relative './src/batch/daily_batch.rb'
+require_relative './src/batch/force_batch.rb'
+require_relative './src/answerers.rb'
 
 Dotenv.load
 
 module Main
-  class Main
+  class SlackConnection
     attr_accessor :client
     def initialize
       Slack.configure do |config|
@@ -30,57 +29,54 @@ module Main
       return members
     end
 
-    def mk_reply(event)
-      user = event['user']
-      text = event['text']
-      ret = nil
-      return if user == ENV['BOT_SLACK_ID'] || user.nil? || text.nil?
-      puts user + ' ' + text
-      objs = [
-        ScheduledContest::Answerer.new,
-        RandomProblem::Answerer.new,
-        Hello.new,
-        RandomProblem::Duel.new
-      ]
-      objs.each do |obj|
-        ans = obj.answer user, text
+    def answers(event)
+      answerers = Answerers.new
+      answerers.objects.each do |obj|
         begin
-          unless ans.nil?
-            ret = ans
-            break
-          end
+          ans = obj.answer event['user'], event['text']
+          return ans unless ans.to_s.empty?
         rescue => e
-          p e.message
-          ret = {as_user: true, channel: ENV['CHANNEL'], text: e.message.to_s}
+          puts e.message.to_s
+          return e.message.to_s
         end
       end
-      return ret
+      return nil 
     end
 
     def reply(event)
-      ret = mk_reply(event)
-      return if ret == '' || ret.nil?
-      p ret
-      message(ret)
+      content = answers event
+      message content unless content.nil?
     end
 
-    def message(hash)
-      puts hash[:text]
-      @client.chat_postMessage(hash)
+    def message(arg)
+      Main::SlackConnection.new.chat_postMessage(mk_message)
+    end
+
+    def mk_message(arg)
+      case arg 
+      when String
+        puts arg
+        return {as_user: true, channel: ENV['CHANNEL'], text: arg}
+      when Hash
+        puts arg[:text]
+        return arg 
+      end
     end
   end
 end
 
 #------------------- Job Scheduler ------------------------
 scheduler = Rufus::Scheduler.new
-main = Main::Main.new
-$members = main.get_members
+slack = Main::SlackConnection.new
+$members = slack.get_members
 
 # scheduler.in '10s' do
 scheduler.cron '0 0 * * *' do
   dbatch = Batch::DailyBatch.new
   dbatch.op_batch
 end
+
+Batch::ForceBatch.op_batch 'contest_today'
 
 # -------------- Server ----------------
 last_event_id = ''
@@ -94,7 +90,7 @@ get '/alive' do
 end
 
 post '/callback' do
-  body = JSON.parse(request.body.read)
+  body = JSON.parse request.body.read
   event = body['event']
   event_id = body['event_id']
   case body['type']
@@ -102,11 +98,12 @@ post '/callback' do
     content_type :json
     body.to_json
   when 'event_callback'
-    next if event_id == last_event_id || Time.now.to_f - event['ts'].to_f > 10.0 || event['channel'] != ENV['CHANNEL']
-    p body
+    next unless RequestCondition.check event , event_id, last_event_id
+    p event
+    #p body
     last_event_id = event_id
-    main = Main::Main.new
-    main.reply(event)
+    slack = Main::SlackConnection.new
+    slack.reply event
     'ok'
   end
 end
@@ -122,7 +119,7 @@ post '/force' do
   elsif body['type'].nil?
     'type is empty'
   else
-    Batch::ForceBatch.op_batch(body['type'])
+    Batch::ForceBatch.op_batch body['type']
   end
 end
 

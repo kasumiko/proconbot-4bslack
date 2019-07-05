@@ -17,7 +17,7 @@ module ScheduledContest
       contests = ContestInfo.new(contests)
       contests.info.each { |contest| ret += contest[:text] }
       ret += 'です。'
-      return {as_user: true, channel: ENV['CHANNEL'], text: ret}
+      return ret
     end
 
     def get_contests_data
