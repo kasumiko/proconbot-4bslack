@@ -31,8 +31,7 @@ module RandomProblem
       end
 
       def post_result(text)
-        mes = Main::Main.new
-        mes.message(as_user: true, channel: ENV['CHANNEL'], text: text)
+        Main::SlackConnection.new.message text: text
       end
 
       def format_submits(submits)

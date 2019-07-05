@@ -5,13 +5,13 @@ require 'rexml/document'
 require 'time'
 require_relative '../operate_db.rb'
 require_relative './scheduled_contest_db.rb'
+require_relative './contest_data.rb'
 
 module ScheduledContest
   class ScheduledContest
     BASE_URI = 'https://atcoder.jp'
 
     def update
-      # ABC is too high
       topxpath = ['//h4[2]', "//div[@class= 'table-responsive'][2]//@href"]
       parsed_docs = parse_page(BASE_URI, topxpath)
       p parsed_docs[0].text
@@ -19,25 +19,25 @@ module ScheduledContest
       # 1... Permanent
       # 2... Upcoming
       # 3... Recent
-      if parsed_docs[0].text =~ /Recent|Constant/
-        contest_data = []
-      else
+      contest_data = []
+      unless parsed_docs[0].text =~ /Recent|Constant/
         links = parsed_docs[1].map.with_index { |cont, i| cont.text if i.odd? }
         links.compact!
-        contest_data = links.map { |l| get_contest_data(BASE_URI + l) }
-        contest_data.map!.with_index do |d, i|
-          d[:id] = i
-          d
+        contest_data = links.map do |l|
+          get_contest_data(BASE_URI + l)
         end
       end
+      return update_db contest_data
+    end
+
+    def update_db(contest_data)
+      newd = ContestData.new(contest_data)
       @db = OperateDB.new
-      unless contest_data.eql?(@db.all_data)
-        old = @db.all_data
-        @db.reflesh_data(ScheduledContests, contest_data)
-        puts('DB has been updated')
-        return @db.get_all_data - old
-      end
-      return []
+      old = ContestData.new(@db.all_data)
+      return [] if newd.data.eql?(old.data)
+      @db.reflesh_data(ScheduledContests, newd.with_index)
+      puts('DB has been updated')
+      return ContestData.new(@db.get_all_data).data - old
     end
 
     def get_page(url = BASE_URI)
@@ -47,10 +47,9 @@ module ScheduledContest
     # xpaths must be array
     def parse_page(url, xpaths)
       doc = get_page(url)
-      ret = xpaths.map { |xp|
+      return xpaths.map { |xp|
         doc.xpath(xp)
       }
-      return ret
     end
 
     def format_contest_data(data)

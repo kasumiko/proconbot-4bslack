@@ -3,7 +3,7 @@ require_relative '../contest_info.rb'
 module ScheduledContest
   class Answerer
     def answer(*query)
-      user = query[0]
+      # user = query[0]
       text = query[1]
       return unless text =~ /コンテスト予定/
       type = ''
@@ -17,12 +17,11 @@ module ScheduledContest
       contests = ContestInfo.new(contests)
       contests.info.each { |contest| ret += contest[:text] }
       ret += 'です。'
-      return {as_user: true, channel: ENV['CHANNEL'], text: ret}
+      return ret
     end
 
     def get_contests_data
-      db = OperateDB.new
-      return db.all_data
+      return OperateDB.new.all_data
     end
   end
 end

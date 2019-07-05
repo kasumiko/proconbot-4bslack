@@ -25,7 +25,7 @@ module RandomProblem
       @db = UserDB::Users
       @users = @db.find_by(slack_name: user)
       @max_score = @users[:max_score].to_i
-      @max_score = 100 if @max_score.zero? 
+      @max_score = 100 if @max_score.zero?
       user = @users[:atcoder_name]
       @solved_problem = get_json(@submission + user)
       update_max_score
@@ -37,7 +37,7 @@ module RandomProblem
       text += prob['contest_id'].upcase + ' ' + prob['title'] + "\n"
       text += mk_url(prob)
       text += "\nを解いてください。"
-      return {as_user: true, channel: ENV['CHANNEL'], text: text}
+      return text
     end
 
     def update_max_score
@@ -74,18 +74,9 @@ module RandomProblem
       return true
     end
 
-    def convert_id(user)
-      user_names = Hash[
-        'kasumiko', 'kasu_miko',
-        'tomohiro_kanda', 'Kandam',
-        'nesouda', 'nesouda'
-      ]
-      return user_names[user]
-    end
-
     def get_json(query)
       base_uri = 'https://kenkoooo.com/atcoder/'
-      JSON.load URI.parse(base_uri + query).open
+      JSON.parse URI.parse(base_uri + query).open.read
     end
   end
 end

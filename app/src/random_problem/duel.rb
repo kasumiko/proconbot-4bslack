@@ -39,7 +39,7 @@ module RandomProblem
                          end
         text += mk_prob_url
         text += "\nで勝負！"
-        Main::Main.new.message as_user: true, channel: ENV['CHANNEL'], text: text
+        Main::SlackConnection.new.message text
       end
 
       def timer
@@ -55,7 +55,7 @@ module RandomProblem
                 end
         s = Rufus::Scheduler.new
         s.in limit do
-          Main::Main.new.message as_user: true, channel: ENV['CHANNEL'], text: '終了！'
+          Main::SlackConnection.new.message '終了！'
           Judge.judge(@prob, @users, limit)
           @@during_duel = false
         end
