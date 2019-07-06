@@ -40,7 +40,7 @@ module Main
           return e.message.to_s
         end
       end
-      return nil 
+      return nil
     end
 
     def reply(event)
@@ -49,17 +49,17 @@ module Main
     end
 
     def message(arg)
-      Main::SlackConnection.new.chat_postMessage(mk_message)
+      @client.chat_postMessage mk_message arg
     end
 
     def mk_message(arg)
-      case arg 
+      case arg
       when String
         puts arg
-        return {as_user: true, channel: ENV['CHANNEL'], text: arg}
+        return { as_user: true, channel: ENV['CHANNEL'], text: arg }
       when Hash
         puts arg[:text]
-        return arg 
+        return arg
       end
     end
   end
@@ -98,9 +98,9 @@ post '/callback' do
     content_type :json
     body.to_json
   when 'event_callback'
-    next unless RequestCondition.check event , event_id, last_event_id
+    next unless RequestCondition.check event, event_id, last_event_id
     p event
-    #p body
+    # p body
     last_event_id = event_id
     slack = Main::SlackConnection.new
     slack.reply event
@@ -122,4 +122,3 @@ post '/force' do
     Batch::ForceBatch.op_batch body['type']
   end
 end
-

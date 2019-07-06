@@ -25,7 +25,7 @@ module RandomProblem
       @db = UserDB::Users
       @users = @db.find_by(slack_name: user)
       @max_score = @users[:max_score].to_i
-      @max_score = 100 if @max_score.zero? 
+      @max_score = 100 if @max_score.zero?
       user = @users[:atcoder_name]
       @solved_problem = get_json(@submission + user)
       update_max_score
@@ -72,15 +72,6 @@ module RandomProblem
         return false if s['problem_id'] == prob['id']
       end
       return true
-    end
-
-    def convert_id(user)
-      user_names = Hash[
-        'kasumiko', 'kasu_miko',
-        'tomohiro_kanda', 'Kandam',
-        'nesouda', 'nesouda'
-      ]
-      return user_names[user]
     end
 
     def get_json(query)

@@ -1,5 +1,7 @@
-example_id                          | status | run_time        |
------------------------------------ | ------ | --------------- |
-./spec/app/main_spec.rb[1:1]        | passed | 0.00231 seconds |
-./spec/app/src/hello_spec.rb[1:1:1] | passed | 0.0001 seconds  |
-./spec/app/src/hello_spec.rb[1:2:1] | passed | 0.00012 seconds |
+example_id                                    | status | run_time        |
+--------------------------------------------- | ------ | --------------- |
+./spec/app/main_spec.rb[1:1]                  | passed | 0.0024 seconds  |
+./spec/app/src/hello_spec.rb[1:1:1]           | passed | 0.00011 seconds |
+./spec/app/src/hello_spec.rb[1:2:1]           | passed | 0.00009 seconds |
+./spec/app/src/request_condition_spec.rb[1:1] | passed | 0.00012 seconds |
+./spec/app/src/request_condition_spec.rb[1:2] | passed | 0.00015 seconds |

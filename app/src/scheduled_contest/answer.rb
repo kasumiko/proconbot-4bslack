@@ -21,8 +21,7 @@ module ScheduledContest
     end
 
     def get_contests_data
-      db = OperateDB.new
-      return db.all_data
+      return OperateDB.new.all_data
     end
   end
 end
