@@ -68,8 +68,8 @@ module Batch
 
     def report(text)
       return if text.nil?
-      messenger = Main::Main.new
-      messenger.message(text)
+      slack = Main::SlackConnection.new
+      slack.message text
     end
   end
 end
