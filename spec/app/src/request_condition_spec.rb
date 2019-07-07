@@ -18,10 +18,10 @@ RSpec.describe 'Event test' do
   end
 
   it 'true' do
-    expect(RequestCondition.check(body,'a','b')).to eq true
+    expect(RequestCondition.check(body, 'a', 'b')).to eq true
   end
   it 'time false' do
     body['ts'] = (body['ts'].to_f - 11.0).to_s
-    expect(RequestCondition.check(body,'a','b')).to eq false
+    expect(RequestCondition.check(body, 'a', 'b')).to eq false
   end
 end

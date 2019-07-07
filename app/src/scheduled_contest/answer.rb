@@ -3,7 +3,7 @@ require_relative '../contest_info.rb'
 module ScheduledContest
   class Answerer
     def answer(*query)
-      user = query[0]
+      # user = query[0]
       text = query[1]
       return unless text =~ /コンテスト予定/
       type = ''

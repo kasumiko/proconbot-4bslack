@@ -29,13 +29,14 @@ class RateCheck
       d[:rate]
     }
     puts 'rate check start!'
-    scheduler.every '1m', last_in: 3600 * 60 do
+
+    scheduler.every '1m', last_in: 3600 * 60, tag: 'rate' do |job|
       new_rate = get_rate
       if comp_rate(old_rate, new_rate)
         rate_report(old_rate, new_rate)
         update(new_rate)
         puts 'rate check finish'
-        return
+        job.unschedule
       end
       puts 'not updated yet'
     end
@@ -50,7 +51,7 @@ class RateCheck
 
   def get_rate
     new_data = @users.map { |u|
-      (JSON.load URI.parse(make_uri(u)).open).last
+      (JSON.parse URI.parse(make_uri(u)).open.read).last
     }
     new_data = symbolize_keys(new_data)
     return new_data.map.with_index { |d, i|

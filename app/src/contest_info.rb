@@ -11,7 +11,7 @@ class ContestInfo
       contest[:duration] = duration
       start = start_time.strftime('%a %b %d %H:%M')
       text = "#{contest[:title]}\n#{start}~ コンテスト時間#{duration}分\n"
-      contest[:text] = text + contest[:url]
+      contest[:text] = text + contest[:url] + "\n"
       contest
     end
   end

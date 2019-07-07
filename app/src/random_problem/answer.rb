@@ -76,7 +76,7 @@ module RandomProblem
 
     def get_json(query)
       base_uri = 'https://kenkoooo.com/atcoder/'
-      JSON.load URI.parse(base_uri + query).open
+      JSON.parse URI.parse(base_uri + query).open.read
     end
   end
 end

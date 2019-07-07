@@ -5,6 +5,8 @@ require 'rexml/document'
 require 'time'
 require_relative '../operate_db.rb'
 require_relative './scheduled_contest_db.rb'
+require_relative './contest_data.rb'
+
 
 module ScheduledContest
   class ScheduledContest
@@ -22,18 +24,21 @@ module ScheduledContest
       unless parsed_docs[0].text =~ /Recent|Constant/
         links = parsed_docs[1].map.with_index { |cont, i| cont.text if i.odd? }
         links.compact!
-        contest_data = links.map.with_index do |l, i|
-          d = get_contest_data(BASE_URI + l)
-          d[:id] = i
-          d
+        contest_data = links.map do |l|
+          get_contest_data(BASE_URI + l)
         end
       end
+      return update_db contest_data
+    end
+
+    def update_db(contest_data)
+      newd = ContestData.new(contest_data)
       @db = OperateDB.new
-      old = @db.all_data
-      return [] if contest_data.eql?(old)
-      @db.reflesh_data(ScheduledContests, contest_data)
+      old = ContestData.new(@db.all_data)
+      return [] if newd.data.eql?(old.data)
+      @db.reflesh_data(ScheduledContests, newd.with_index)
       puts('DB has been updated')
-      return @db.get_all_data - old
+      return ContestData.new(@db.get_all_data).data - old
     end
 
     def get_page(url = BASE_URI)

@@ -76,7 +76,8 @@ scheduler.cron '0 0 * * *' do
   dbatch.op_batch
 end
 
-Batch::ForceBatch.op_batch 'contest_today'
+
+Batch::ForceBatch.op_batch 'rate_check'
 
 # -------------- Server ----------------
 last_event_id = ''
