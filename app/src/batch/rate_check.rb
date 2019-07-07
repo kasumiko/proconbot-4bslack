@@ -29,6 +29,7 @@ class RateCheck
       d[:rate]
     }
     puts 'rate check start!'
+
     scheduler.every '1m', last_in: 3600 * 60, tag: 'rate' do |job|
       new_rate = get_rate
       if comp_rate(old_rate, new_rate)

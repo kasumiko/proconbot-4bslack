@@ -7,6 +7,7 @@ require_relative '../operate_db.rb'
 require_relative './scheduled_contest_db.rb'
 require_relative './contest_data.rb'
 
+
 module ScheduledContest
   class ScheduledContest
     BASE_URI = 'https://atcoder.jp'
