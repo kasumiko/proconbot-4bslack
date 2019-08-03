@@ -33,8 +33,8 @@ module ScheduledContest
     def update_db(contest_data)
       newd = ContestData.new(contest_data)
       @db = OperateDB.new
-      old = ContestData.new(@db.all_data)
-      return [] if newd.data.eql?(old.data)
+      old = ContestData.new(@db.all_data).data
+      return [] if newd.data.eql?(old)
       @db.reflesh_data(ScheduledContests, newd.with_index)
       puts('DB has been updated')
       return ContestData.new(@db.get_all_data).data - old
